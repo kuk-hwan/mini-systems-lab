@@ -1,4 +1,4 @@
-name: Verify Mini React, Redis and DBMS
+name: Verify Mini React
 on:
   push:
     branches: [main]
@@ -14,12 +14,7 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - run: npm ci
-      - run: npm run test:backend
-      - run: python -m backend.cli examples/demo.sql --data .data/ci-cli
       - run: npm run typecheck
       - run: npm run test:coverage
       - run: npm run build
