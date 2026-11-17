@@ -67,6 +67,36 @@ class HashTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             cache.set('', 1)
 
+    def test_read_and_extend_ttl_without_replacing_value(self):
+        clock = [100.0]
+        cache = MiniRedis(lambda: clock[0])
+        cache.set('hint', 'Try again', 10)
+        cache.set('permanent', None)
+        clock[0] += 8
+        self.assertEqual(cache.ttl('hint'), 2)
+        self.assertEqual(cache.ttl('permanent'), -1)
+        self.assertTrue(cache.expire('hint', 7))
+        self.assertEqual(cache.get('hint')['value'], 'Try again')
+        self.assertEqual(cache.ttl('hint'), 7)
+        clock[0] += 7
+        self.assertEqual(cache.ttl('hint'), -2)
+        self.assertFalse(cache.expire('hint', 5))
+        self.assertEqual(cache.stats()['expired'], 1)
+
+    def test_atomic_increment_keeps_the_original_ttl(self):
+        clock = [100.0]
+        cache = MiniRedis(lambda: clock[0])
+        self.assertEqual(cache.incr('queries', ttl=10), 1)
+        clock[0] += 2
+        self.assertEqual(cache.incr('queries', ttl=30), 2)
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            counts = list(pool.map(lambda _: cache.incr('queries'), range(50)))
+        self.assertEqual(sorted(counts), list(range(3, 53)))
+        self.assertEqual(cache.ttl('queries'), 8)
+        cache.set('hint', 'not a number')
+        with self.assertRaises(ValueError):
+            cache.incr('hint')
+
     def test_snapshot_absolute_ttl(self):
         clock = [10]
         cache = MiniRedis(lambda: clock[0])

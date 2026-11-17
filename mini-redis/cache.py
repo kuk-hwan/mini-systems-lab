@@ -65,35 +65,71 @@ class MiniRedis:
     def set(self, key, value, ttl=None):
         if not isinstance(key, str) or not key or len(key.encode('utf-8')) > 1024:
             raise ValueError('key must be a nonempty UTF-8 string up to 1024 bytes')
-        if ttl is not None and (type(ttl) not in (int, float) or not math.isfinite(ttl) or ttl < 0):
-            raise ValueError('ttl must be a finite nonnegative number of seconds')
+        self._validate_ttl(ttl)
         json.dumps(value, allow_nan=False)
         with self.lock:
             self.table.set(key, (copy.deepcopy(value), None if ttl is None else self.clock() + ttl))
 
     def get(self, key):
         with self.lock:
-            entry = self.table.get(key)
-            if entry is not None and entry[1] is not None and entry[1] <= self.clock():
-                self.table.delete(key)
-                self.expired += 1
-                entry = None
+            entry = self._live_entry(key, self.clock())
             if entry is None:
                 self.misses += 1
                 return {'found': False, 'value': None}
             self.hits += 1
             return {'found': True, 'value': copy.deepcopy(entry[0])}
 
-    def delete(self, key):
+    def ttl(self, key):
+        """Return remaining seconds, -1 for no deadline, or -2 for a missing key."""
         with self.lock:
-            entry = self.table.get(key)
+            now = self.clock()
+            entry = self._live_entry(key, now)
+            if entry is None:
+                return -2
+            return -1 if entry[1] is None else entry[1] - now
+
+    def expire(self, key, ttl):
+        self._validate_ttl(ttl)
+        if ttl is None:
+            raise ValueError('expire requires a TTL')
+        with self.lock:
+            now = self.clock()
+            entry = self._live_entry(key, now)
             if entry is None:
                 return False
-            self.table.delete(key)
-            if entry[1] is not None and entry[1] <= self.clock():
-                self.expired += 1
-                return False
+            self.table.set(key, (entry[0], now + ttl))
             return True
+
+    def incr(self, key, *, ttl=None):
+        """Increment an integer, applying the optional TTL only to a new key."""
+        self._validate_ttl(ttl)
+        with self.lock:
+            entry = self._live_entry(key, self.clock())
+            if entry is None:
+                self.set(key, 1, ttl)
+                return 1
+            if type(entry[0]) is not int:
+                raise ValueError('incr requires an integer value')
+            value = entry[0] + 1
+            self.table.set(key, (value, entry[1]))
+            return value
+
+    def delete(self, key):
+        with self.lock:
+            return self._live_entry(key, self.clock()) is not None and self.table.delete(key)
+
+    def _live_entry(self, key, now):
+        entry = self.table.get(key)
+        if entry is not None and entry[1] is not None and entry[1] <= now:
+            self.table.delete(key)
+            self.expired += 1
+            return None
+        return entry
+
+    @staticmethod
+    def _validate_ttl(ttl):
+        if ttl is not None and (type(ttl) not in (int, float) or not math.isfinite(ttl) or ttl < 0):
+            raise ValueError('ttl must be a finite nonnegative number of seconds')
 
     def sweep(self):
         with self.lock:

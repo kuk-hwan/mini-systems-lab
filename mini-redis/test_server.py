@@ -1,13 +1,17 @@
 import http.client
 import json
+import sqlite3
 import tempfile
 import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from pathlib import Path
 from urllib.parse import quote
 
 from cache import MiniRedis
 from server import CacheServer
+from quiz_results import RECENT_TTL
 
 
 class CacheApiTests(unittest.TestCase):
@@ -16,7 +20,10 @@ class CacheApiTests(unittest.TestCase):
         self.cache = MiniRedis(lambda: self.now)
         data = self.enterContext(tempfile.TemporaryDirectory())
         self.snapshot = Path(data) / 'cache.json'
-        self.server = self.enterContext(CacheServer(('127.0.0.1', 0), self.cache, self.snapshot))
+        self.results_path = Path(data) / 'scores.sqlite3'
+        self.server = self.enterContext(CacheServer(
+            ('127.0.0.1', 0), self.cache, self.snapshot, results_path=self.results_path,
+        ))
         worker = threading.Thread(target=self.server.serve_forever)
         worker.start()
         self.addCleanup(worker.join)
@@ -35,6 +42,16 @@ class CacheApiTests(unittest.TestCase):
             return response.status, dict(response.getheaders()), response.read().decode('utf-8')
         finally:
             connection.close()
+
+    def complete_quiz(self, choices):
+        _, headers, _ = self.request_raw('POST', '/quiz/start')
+        path = headers['Location']
+        for choice in choices:
+            self.assertEqual(self.request_raw('POST', path + '/answer', f'choice={choice}')[0], 303)
+            status, headers, _ = self.request_raw('POST', path + '/next')
+            self.assertEqual(status, 303)
+            path = headers['Location']
+        return path
 
     def test_put_get_expiry_delete_and_metrics(self):
         path = '/api/kv/' + quote('상품:1', safe='')
@@ -69,8 +86,12 @@ class CacheApiTests(unittest.TestCase):
         status, hint = self.request('GET', path + '/hint')
         self.assertEqual((status, hint['status']), (200, 'HIT'))
         self.assertEqual(self.request('GET', '/api/kv/' + round_data['key'])[1]['found'], False)
+        _, unread_round = self.request('POST', '/api/quiz/rounds', {'index': 1})
+        unread_path = '/api/quiz/rounds/' + unread_round['token'] + '/hint'
         self.now += round_data['hint_seconds']
-        self.assertEqual(self.request('GET', path + '/hint'), (200, {'status': 'MISS', 'value': None}))
+        self.assertEqual(self.request('GET', path + '/hint'), (409, {'status': 'LIMIT', 'value': None}))
+        self.assertEqual(self.request('GET', unread_path), (200, {'status': 'MISS', 'value': None}))
+        self.assertEqual(self.request('GET', unread_path), (409, {'status': 'LIMIT', 'value': None}))
         status, result = self.request('POST', path + '/answer', {'choice': 0})
         self.assertEqual((status, result['correct'], result['timed_out']), (200, True, False))
         self.assertEqual(self.request('POST', path + '/answer', {'choice': 1}), (200, result))
@@ -99,9 +120,6 @@ class CacheApiTests(unittest.TestCase):
             if i == 1:
                 self.assertEqual(self.request_raw('POST', path + '/hint')[0], 303)
                 self.assertIn('GET · HIT', self.request_raw('GET', path)[2])
-                self.now += 10
-                self.assertEqual(self.request_raw('POST', path + '/hint')[0], 303)
-                self.assertIn('GET · MISS', self.request_raw('GET', path)[2])
             status, _, _ = self.request_raw('POST', path + '/answer', f'choice={choice}')
             self.assertEqual(status, 303)
             status, _, page = self.request_raw('GET', path)
@@ -126,3 +144,81 @@ class CacheApiTests(unittest.TestCase):
         self.assertIn('시간이 끝났어요.', page)
         self.assertIn('1 / 5 완료', page)
         self.assertNotIn('http-equiv="refresh"', page)
+
+    def test_hint_shows_redis_ttl_and_accepts_only_one_lookup(self):
+        _, headers, _ = self.request_raw('POST', '/quiz/start')
+        path = headers['Location']
+        self.now += 8
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            statuses = list(pool.map(lambda _: self.request_raw('POST', path + '/hint')[0], range(2)))
+        self.assertEqual(statuses, [303, 303])
+        _, _, page = self.request_raw('GET', path)
+        self.assertIn('aria-label="캐시에 남은 힌트 시간" aria-valuemin="0" aria-valuemax="10" aria-valuenow="2"', page)
+        self.assertIn('이번 문제 조회 <strong>1회</strong>', page)
+        self.assertIn('class="hint-button" type="submit" disabled>힌트 조회 완료', page)
+        self.assertEqual(page.count('GET · HIT'), 1)
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            statuses = list(pool.map(lambda _: self.request_raw('POST', path + '/extend')[0], range(2)))
+        self.assertEqual(statuses, [303, 303])
+        _, _, page = self.request_raw('GET', path)
+        self.assertIn('aria-valuemax="15" aria-valuenow="7"', page)
+        self.assertIn('aria-valuemax="25" aria-valuenow="17"', page)
+        self.assertEqual(page.count('<b>EXPIRE</b>'), 1)
+        self.assertIn('연장 사용 완료', page)
+        self.assertIn('이번 문제 조회 <strong>1회</strong>', page)
+
+        self.now += 7
+        self.assertEqual(self.request_raw('POST', path + '/hint')[0], 303)
+        _, _, page = self.request_raw('GET', path)
+        self.assertNotIn('GET · MISS', page)
+        self.assertIn('TTL 만료', page)
+        self.assertIn('이번 문제 조회 <strong>1회</strong>', page)
+        self.assertEqual(self.request_raw('POST', path + '/answer', 'choice=0')[0], 303)
+        _, headers, _ = self.request_raw('POST', path + '/next')
+        self.assertIn('이번 문제 조회 <strong>0회</strong>', self.request_raw('GET', headers['Location'])[2])
+
+    def test_expired_hint_cannot_be_extended(self):
+        _, headers, _ = self.request_raw('POST', '/quiz/start')
+        path = headers['Location']
+        self.now += 10
+        self.assertEqual(self.request_raw('POST', path + '/extend')[0], 303)
+        _, _, page = self.request_raw('GET', path)
+        self.assertIn('TTL 만료', page)
+        self.assertNotIn('<b>EXPIRE</b>', page)
+        self.assertIn('이번 문제 조회 <strong>0회</strong>', page)
+
+        for _ in range(2):
+            self.assertEqual(self.request_raw('POST', path + '/hint')[0], 303)
+        _, _, page = self.request_raw('GET', path)
+        self.assertEqual(page.count('GET · MISS'), 1)
+        self.assertIn('class="hint-button" type="submit" disabled>힌트 조회 완료', page)
+        self.assertIn('이번 문제 조회 <strong>1회</strong>', page)
+
+    def test_recent_scores_miss_hit_expire_and_invalidate_on_new_score(self):
+        first = self.complete_quiz((0, 1, 2, 0, 2))
+        queries = []
+        self.server.results.db.set_trace_callback(queries.append)
+
+        def read_result(path, expected):
+            queries.clear()
+            _, _, page = self.request_raw('GET', path)
+            self.assertIn(f'GET · {expected}', page)
+            used_db = any('SELECT score' in statement for statement in queries)
+            self.assertEqual(used_db, expected == 'MISS')
+            return page
+
+        self.assertIn('<strong>5 / 5</strong>', read_result(first, 'MISS'))
+        self.assertIn('결과 목록 다시 조회', read_result(first, 'HIT'))
+        last_question = first.removesuffix('/result')
+        self.assertEqual(self.request_raw('POST', last_question + '/next')[0], 303)
+        read_result(first, 'HIT')
+        self.now += RECENT_TTL
+        read_result(first, 'MISS')
+
+        second = self.complete_quiz((1, 0, 0, 1, 0))
+        page = read_result(second, 'MISS')
+        self.assertLess(page.index('<strong>0 / 5</strong>'), page.index('<strong>5 / 5</strong>'))
+        read_result(second, 'HIT')
+        with closing(sqlite3.connect(self.results_path)) as db:
+            self.assertEqual(db.execute('SELECT score FROM quiz_results ORDER BY id').fetchall(), [(5,), (0,)])

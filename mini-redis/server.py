@@ -3,6 +3,7 @@ import argparse
 import json
 import logging
 import re
+import sqlite3
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlsplit
@@ -10,21 +11,32 @@ from urllib.parse import parse_qs, unquote, urlsplit
 from cache import MiniRedis
 from quiz import Quiz
 from quiz_page import QuizPages, WEB
+from quiz_results import QuizResults
 
 
-QUIZ_PATH = re.compile(r'/quiz/([0-9a-f]{32})(?:/(answer|hint|next|result))?')
+QUIZ_PATH = re.compile(r'/quiz/([0-9a-f]{32})(?:/(answer|hint|extend|next|result))?')
+RESULTS_DB = Path(__file__).with_name('.data') / 'quiz-results.sqlite3'
 
 
 class CacheServer(ThreadingHTTPServer):
     # Let outstanding writes finish before saving the shutdown snapshot.
     daemon_threads = False
 
-    def __init__(self, address, cache, snapshot=None):
+    def __init__(self, address, cache, snapshot=None, *, results_path=None):
         self.cache = cache
         self.snapshot = snapshot
         self.quiz = Quiz(cache.clock)
-        self.quiz_pages = QuizPages(self.quiz)
-        super().__init__(address, CacheHandler)
+        self.results = QuizResults(self.quiz.cache, results_path)
+        self.quiz_pages = QuizPages(self.quiz, self.results)
+        try:
+            super().__init__(address, CacheHandler)
+        except OSError:
+            self.results.close()
+            raise
+
+    def server_close(self):
+        super().server_close()
+        self.results.close()
 
     def get_request(self):
         connection, address = super().get_request()
@@ -71,7 +83,13 @@ class CacheHandler(BaseHTTPRequestHandler):
             if len(token) != 32 or any(char not in '0123456789abcdef' for char in token):
                 raise ValueError('Invalid round token')
             if self.command == 'GET' and action == 'hint':
-                return 200, self.server.quiz.hint(token)
+                try:
+                    event = self.server.quiz.hint(token)
+                except LookupError:
+                    return 200, {'status': 'MISS', 'value': None}
+                if event is None:
+                    return 409, {'status': 'LIMIT', 'value': None}
+                return 200, {'status': event['status'], 'value': event['value']}
             if self.command == 'POST' and action == 'answer':
                 body = self._read_object()
                 if 'choice' not in body:
@@ -130,7 +148,7 @@ class CacheHandler(BaseHTTPRequestHandler):
                 token, action = match.groups()
                 if self.command == 'GET' and action in (None, 'result'):
                     return self._html(200, pages.play(token, show_results=action == 'result'))
-                if self.command == 'POST' and action in ('answer', 'hint', 'next'):
+                if self.command == 'POST' and action in ('answer', 'hint', 'extend', 'next'):
                     choice = None
                     if action == 'answer':
                         data = parse_qs(self._read_body(1024).decode('ascii'), max_num_fields=4)
@@ -143,6 +161,9 @@ class CacheHandler(BaseHTTPRequestHandler):
             return self._html(404, pages.intro('이 문제 세션은 종료됐어요. 새 퀴즈를 시작해 주세요.'))
         except (ValueError, TimeoutError):
             return self._html(400, pages.intro('요청을 처리하지 못했어요. 새 퀴즈를 시작해 주세요.'))
+        except sqlite3.Error:
+            logging.exception('Quiz results operation failed')
+            return self._html(500, pages.intro('퀴즈 결과를 처리하지 못했어요. 잠시 후 다시 시도해 주세요.'))
         return self._html(404, pages.intro('요청한 퀴즈 화면을 찾을 수 없어요.'))
 
     def _html(self, code, page):
@@ -168,12 +189,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=8787)
     parser.add_argument('--snapshot', type=Path, help='Optional path to persist the cache')
+    parser.add_argument('--results-db', type=Path, default=RESULTS_DB, help='SQLite file for completed quiz scores')
     args = parser.parse_args()
 
     cache = MiniRedis()
     if args.snapshot is not None:
         cache.restore(args.snapshot)
-    with CacheServer(('127.0.0.1', args.port), cache, args.snapshot) as server:
+    with CacheServer(('127.0.0.1', args.port), cache, args.snapshot, results_path=args.results_db) as server:
         print(f'Mini Redis: http://127.0.0.1:{server.server_port}', flush=True)
         try:
             server.serve_forever()
