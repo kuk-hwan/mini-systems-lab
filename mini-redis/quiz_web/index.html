@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="시간 제한 퀴즈를 풀며 Mini Redis의 힌트 만료와 캐시 HIT, MISS를 확인하세요.">
+    <title>시간 제한 퀴즈 · Mini Redis</title>
+    <link rel="stylesheet" href="/quiz.css">
+    ${refresh}
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="/quiz" aria-label="Mini Redis 퀴즈 처음 화면">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>Mini<b>Redis</b></span>
+        </a>
+        <span class="top-label">학습 실험실</span>
+      </div>
+    </header>
+    <main class="shell">
+      <header class="page-heading">
+        <div>
+          <h1>시간 제한 퀴즈<span>.</span></h1>
+          <p>문제를 풀고, 힌트가 Redis에서 사라지는 순간을 확인해 보세요.</p>
+        </div>
+        <div class="rounds" aria-label="전체 진행 상황">
+          <span id="progress-label">${progress}</span>
+          <ol aria-hidden="true">${dots}</ol>
+        </div>
+      </header>
+
+      <div class="${layout}">
+        <section class="quiz-panel" aria-label="퀴즈">
+          ${message}
+          ${stage}
+        </section>
+
+        <aside class="inspector" aria-label="Mini Redis 실험 기록">
+          <section class="hint-card">
+            ${hint}
+          </section>
+          <section class="event-card">
+            <h2>캐시 기록</h2>
+            ${events}
+          </section>
+        </aside>
+      </div>
+    </main>
+  </body>
+</html>
