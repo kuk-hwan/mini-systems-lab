@@ -45,6 +45,7 @@ QUESTIONS = (
 
 ROUND_SECONDS = 25
 HINT_SECONDS = 10
+HINT_EXTENSION_SECONDS = 5
 RESULT_SECONDS = 90
 
 
@@ -72,8 +73,38 @@ class Quiz:
         }
 
     def hint(self, token):
-        result = self.cache.get(f'quiz:hint:{token}')
-        return {'status': 'HIT' if result['found'] else 'MISS', 'value': result['value']}
+        with self.cache.lock:
+            state = self.get_round(token)
+            if state.get('hint_queries', 0) >= 1:
+                return None
+            key = f'quiz:hint:{token}'
+            result = self.cache.get(key)
+            queries = self.cache.incr(f'quiz:hint-queries:{token}', ttl=self.round_ttl(state))
+            event = {
+                'command': 'GET', 'status': 'HIT' if result['found'] else 'MISS',
+                'value': result['value'], 'queries': queries,
+            }
+            self.save_hint_event(token, {**state, 'hint_queries': queries}, event)
+            return event
+
+    def hint_ttl(self, token):
+        return max(0, self.cache.ttl(f'quiz:hint:{token}'))
+
+    def extend_hint(self, token):
+        with self.cache.lock:
+            state = self.get_round(token)
+            if state.get('hint_extended') or 'result' in state or self.clock() >= state['deadline']:
+                return False
+            key = f'quiz:hint:{token}'
+            left = self.hint_ttl(token)
+            if left == 0 or not self.cache.expire(key, left + HINT_EXTENSION_SECONDS):
+                return False
+            self.save_hint_event(token, {**state, 'hint_extended': True}, {'command': 'EXPIRE'})
+            return True
+
+    def save_hint_event(self, token, state, event):
+        events = [event, *state.get('hint_events', [])][:5]
+        self.save_round(token, {**state, 'hint_events': events})
 
     def get_round(self, token):
         record = self.cache.get(f'quiz:round:{token}')
@@ -82,8 +113,10 @@ class Quiz:
         return record['value']
 
     def save_round(self, token, state):
-        ttl = max(0, state['deadline'] + RESULT_SECONDS - self.clock())
-        self.cache.set(f'quiz:round:{token}', state, ttl)
+        self.cache.set(f'quiz:round:{token}', state, self.round_ttl(state))
+
+    def round_ttl(self, state):
+        return max(0, state['deadline'] + RESULT_SECONDS - self.clock())
 
     def answer(self, token, choice):
         with self.cache.lock:

@@ -1,0 +1,198 @@
+{
+  "created_at_utc": "2026-11-20T06:36:27.808960+00:00",
+  "destination": "https://github.com/kuk-hwan/mini-systems-lab",
+  "sources": [
+    {
+      "repository": "kuk-hwan/mini-react-fiber-lab",
+      "namespace": "react",
+      "selected_branch": "main",
+      "selected_sha": "49bebac576ed149529fa789f4e48ba178c7d904b",
+      "imports": [
+        {
+          "directory": "mini-react-fiber-lab",
+          "source_subdirectory": ""
+        }
+      ],
+      "refs": [
+        {
+          "source_ref": "refs/heads/main",
+          "destination_ref": "refs/heads/react/main",
+          "sha": "49bebac576ed149529fa789f4e48ba178c7d904b"
+        }
+      ],
+      "commit_count": 17,
+      "commits": [
+        "01412e031019bd673a4499853b5557c97524ff6f",
+        "0848ba555dbc5663a362e52b79e02215968475bc",
+        "08e40fe61668dd9f3c8eae37d83ba2c8e9b82458",
+        "2387546493b142d97c0475966136d9181d1bda4c",
+        "49bebac576ed149529fa789f4e48ba178c7d904b",
+        "707f6325a9db8b5c7d3068ad2f0b17d1a204bbf8",
+        "7a3f146c07b2022ba4ea691b9ca99b3d34a4d366",
+        "7b1a4f2a4b3951ffd2750b3faccd9aad579a5030",
+        "7d6ff82d573b541f1ea02090ca3087203741a5f4",
+        "81a66929fe981953840a123cd372191a0d717077",
+        "94d52b0dcc1bf05aafc64641b5001cc36d857db6",
+        "9a53792d73898f12dd12694daa9889d8e89a3f66",
+        "a312d3d2c36046c83c7946c8a0ca1d8ad73f29f3",
+        "b947fdf6d25d0fc1783e1087b3f0729a01026a4b",
+        "d3923eb5e4c012df11b8bd2adcd6cffd476ca743",
+        "dc501bb0e65a2b56059c4530f09e2e9f32983543",
+        "fc8943adb814eabbb412951d4189196c80954a67"
+      ]
+    },
+    {
+      "repository": "kuk-hwan/mini-redis",
+      "namespace": "redis",
+      "selected_branch": "feat/kuk-hwan/mini-redis",
+      "selected_sha": "22cb5f2fb23c85bbd8465991bea1287952583479",
+      "imports": [
+        {
+          "directory": "mini-redis",
+          "source_subdirectory": "mini-redis"
+        }
+      ],
+      "refs": [
+        {
+          "source_ref": "refs/heads/BurningWings",
+          "destination_ref": "refs/heads/redis/BurningWings",
+          "sha": "ec26db9c3573cf08c5d5936226757545d048fc63"
+        },
+        {
+          "source_ref": "refs/heads/CatIsApple",
+          "destination_ref": "refs/heads/redis/CatIsApple",
+          "sha": "c87d673958c8088365f51249430c11a07aa7f1fd"
+        },
+        {
+          "source_ref": "refs/heads/feat/kuk-hwan/mini-redis",
+          "destination_ref": "refs/heads/redis/feat/kuk-hwan/mini-redis",
+          "sha": "22cb5f2fb23c85bbd8465991bea1287952583479"
+        },
+        {
+          "source_ref": "refs/heads/main",
+          "destination_ref": "refs/heads/redis/main",
+          "sha": "d321e2a1cd177727c80eb301d4988d33570a6fb9"
+        }
+      ],
+      "commit_count": 46,
+      "commits": [
+        "01473e76d7ffc70f48c693f79e687d572866b7a7",
+        "07d0326ed298db12c82eecf634931a68c34dcb2c",
+        "0b152c9e6e5a2ece6e206b7cad215a86fee00126",
+        "10a315232e886e04e9b1e0831e66483f0ac7184a",
+        "1d8c84b82c35d492f656d2bd1232f51ab7cce72d",
+        "20b6965113075d84a1fe84dbf8703aba4eff18ad",
+        "22cb5f2fb23c85bbd8465991bea1287952583479",
+        "26930b44dc91baa1db2d92efd59057c0188d931f",
+        "2d9954ccd71847f823ed013c72c9f9a1804c4d53",
+        "2f81519e573227537c63ea3633240e0e434d9c30",
+        "316e2e1f1b283756762024e5a0c2e55833813cf3",
+        "3a58e5be9aaf3e816732e0ad12f9e6db8b120e08",
+        "3c41a2f526e67fbe0b84b86bb41f0c4c4b221031",
+        "47d71dfc6b6babc4934167c45414aeb7e858fc7f",
+        "49d543b5efe398b776401b45587023895e0e9945",
+        "4c811621e613e6303a723417be0f1ea2ccfc0b4a",
+        "6206f2c20f263fc994956893ac18e60f32fabef3",
+        "65eca6ddd5a431a664967fe5713022302f3a374e",
+        "66deaeba495f6ae61a5413cf7d6b72e4ff80bacd",
+        "6cce80973ad89ba9b3970f46e1ea911f21e6e3fc",
+        "6d49702f69c25bc5e38176f4d64ea79a32e28a63",
+        "75b29fa28697b2f01361d45d7d7d515e0ba87b1a",
+        "78fe9e33b2b8ee8744ba6eab04834302f56a8be1",
+        "7cc4efae9f54870a75a62cad5fbb8561f2659dda",
+        "8230d176c16c30871acb1d58903215736183b334",
+        "89427daf174adb8294420a1a7284a5b23e5ee007",
+        "8f38f0da44ac81b53ef92cc3956eee7c7f62aac7",
+        "8fe699b1afd6edb3b852ec62efda3f426b699e64",
+        "92811987501f39b1b653ec6940253db42c512fca",
+        "950fcdd89bc2c9a46c12c5d31ce7a136c7e6759e",
+        "9f67b743ae79e2bc80a1fcaf267a7589c0a1b260",
+        "9fba44d4380369b8807d5b2d2ff564056dfca019",
+        "a21914f069c6d4cac96cdf0ed708f27ab2ba304f",
+        "a7a6e22eff83dafa505b07874be0c01533b97ace",
+        "abfbbaf7aa88ddf5a51984e83ed0ae75f5634a1d",
+        "bf6f1e0458dc48052f6f67abde789368ba3932c3",
+        "bfad9562738eb4c0c1cf108b25add7330bca01ab",
+        "c1cec9845db25418c97641b0a4aff611c892b149",
+        "c3fc04d437b7f08489cebb1e0979bccd7356eb8a",
+        "c87d673958c8088365f51249430c11a07aa7f1fd",
+        "cb2dd4ad60f6d1ab8d103910a1bcf994ac19a519",
+        "cfa07272cd3aa9994ed8410e990184c15383e32d",
+        "d321e2a1cd177727c80eb301d4988d33570a6fb9",
+        "d622969dcd874c020f93db8c4d2af395fa846171",
+        "de7f275253c67b587bd757079fd3bf20b3deb30b",
+        "ec26db9c3573cf08c5d5936226757545d048fc63"
+      ]
+    },
+    {
+      "repository": "kuk-hwan/mini-DBMS",
+      "namespace": "dbms",
+      "selected_branch": "feat/kuk-hwan/c-web-server",
+      "selected_sha": "39c4f34071684a3b0f4c7ffd07e7511a70d45335",
+      "imports": [
+        {
+          "directory": "mini-dbms",
+          "source_subdirectory": "mini-dbms"
+        },
+        {
+          "directory": "mini-webserver",
+          "source_subdirectory": "mini-webserver"
+        }
+      ],
+      "refs": [
+        {
+          "source_ref": "refs/heads/BurningWings",
+          "destination_ref": "refs/heads/dbms/BurningWings",
+          "sha": "f0727415a5f961e0a1c3c53373ad837ad00f80cf"
+        },
+        {
+          "source_ref": "refs/heads/CatIsApple",
+          "destination_ref": "refs/heads/dbms/CatIsApple",
+          "sha": "77d7406db3fd2a20eeb462202a347c18617f8e41"
+        },
+        {
+          "source_ref": "refs/heads/feat/kuk-hwan/c-web-server",
+          "destination_ref": "refs/heads/dbms/feat/kuk-hwan/c-web-server",
+          "sha": "39c4f34071684a3b0f4c7ffd07e7511a70d45335"
+        },
+        {
+          "source_ref": "refs/heads/kuk-hwan",
+          "destination_ref": "refs/heads/dbms/kuk-hwan",
+          "sha": "45b645021d06c8c43c288305716d6fe88b305a5b"
+        },
+        {
+          "source_ref": "refs/heads/main",
+          "destination_ref": "refs/heads/dbms/main",
+          "sha": "210c0116f826482694928e54b394d6561c7b40e2"
+        }
+      ],
+      "commit_count": 16,
+      "commits": [
+        "13cb5413584b5aa8e64e679f3c9eb5d5105a5764",
+        "210c0116f826482694928e54b394d6561c7b40e2",
+        "39c4f34071684a3b0f4c7ffd07e7511a70d45335",
+        "4253b9f159c29f0a9c0211cde57f6fb838f4ce14",
+        "445057b67fdb278ccfbdd53c7ff9f9c71d76b32c",
+        "45b645021d06c8c43c288305716d6fe88b305a5b",
+        "5cd11008a2cc4aab88caab33ab5d9cf597582c22",
+        "5f358c40ac2102cadbe71bca62d03743b548387d",
+        "6b58604883f6aec08cae80204dd2093142be1917",
+        "77d7406db3fd2a20eeb462202a347c18617f8e41",
+        "8e151689f6f5131e886f9d983f9ead31730beabb",
+        "90be9f6d1b3bc0300484999d1da6a0760704d2a8",
+        "9562450df9882bf3b3b541afe8b749d13cf221ef",
+        "dcbc1cbf00f3dc78b387821f7b2430ac87baac27",
+        "e27129622b881cbb0ce1d308baba7353f0798df4",
+        "f0727415a5f961e0a1c3c53373ad837ad00f80cf"
+      ]
+    }
+  ],
+  "quiz_overlay": {
+    "source": "kuk-hwan/mini-react-fiber-lab",
+    "branch": "main",
+    "sha": "49bebac576ed149529fa789f4e48ba178c7d904b",
+    "path": "mini-redis",
+    "destination": "mini-redis",
+    "reason": "Preserve the later hint TTL/extension, one-query limit and result-cache features."
+  }
+}

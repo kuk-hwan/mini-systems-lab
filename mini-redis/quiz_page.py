@@ -1,17 +1,20 @@
 """Render and handle the quiz with Python, using ordinary HTML forms."""
 
+from datetime import datetime
 from html import escape
 from math import ceil
 from pathlib import Path
 from string import Template
 
-from quiz import HINT_SECONDS, QUESTIONS, ROUND_SECONDS
+from quiz import HINT_EXTENSION_SECONDS, HINT_SECONDS, QUESTIONS, ROUND_SECONDS
+from quiz_results import RECENT_KEY, RECENT_TTL
 
 
 WEB = Path(__file__).with_name('quiz_web')
 TEMPLATE = Template((WEB / 'index.html').read_text(encoding='utf-8'))
 TOTAL = len(QUESTIONS)
-HINT_RETRY = '힌트 시간이 끝났어요. 다시 조회해서 MISS를 확인해 보세요.'
+HINT_EXPIRED = '힌트 시간이 끝났어요.'
+HINT_EXPIRED_UNUSED = '힌트 시간이 끝났어요. 첫 조회에서 MISS를 확인할 수 있어요.'
 HINT_MISS = '캐시가 만료돼 힌트를 가져올 수 없어요.'
 
 
@@ -46,16 +49,18 @@ def meter(left, duration, label, running=True):
     )
 
 
-def action_button(path, label, kind='primary', arrow='→'):
+def action_button(path, label, kind='primary', arrow='→', *, disabled=False):
+    disabled_attribute = ' disabled' if disabled else ''
     return (
-        f'<form method="post" action="{path}"><button class="{kind}" type="submit">'
+        f'<form method="post" action="{path}"><button class="{kind}" type="submit"{disabled_attribute}>'
         f'{escape(label)} <span aria-hidden="true">{arrow}</span></button></form>'
     )
 
 
 class QuizPages:
-    def __init__(self, quiz):
+    def __init__(self, quiz, scores):
         self.quiz = quiz
+        self.scores = scores
 
     def start(self):
         token = self.quiz.start(0)['token']
@@ -63,28 +68,32 @@ class QuizPages:
 
     def act(self, token, action, choice=None):
         path = f'/quiz/{token}'
+        if action == 'hint':
+            self.quiz.hint(token)
+            return path
+        if action == 'extend':
+            self.quiz.extend_hint(token)
+            return path
+        if action == 'answer':
+            self.quiz.answer(token, choice)
+            return path
+        if action != 'next':
+            raise LookupError('Unknown quiz action')
         with self.quiz.cache.lock:
             state = self.quiz.get_round(token)
-            if action == 'answer':
-                self.quiz.answer(token, choice)
-            elif action == 'hint':
-                event = self.quiz.hint(token)
-                events = [event, *state.get('hint_events', [])][:5]
-                self.quiz.save_round(token, {**state, 'hint_events': events})
-            elif action == 'next':
-                if 'result' not in state:
-                    raise ValueError('Submit an answer before going to the next question')
-                if state['index'] + 1 == TOTAL:
-                    return path + '/result'
-                next_token = state.get('next_token')
-                if next_token is None:
-                    history = self.history(state)
-                    next_token = self.quiz.start(state['index'] + 1, history)['token']
-                    self.quiz.save_round(token, {**state, 'next_token': next_token})
-                return f'/quiz/{next_token}'
-            else:
-                raise LookupError('Unknown quiz action')
-        return path
+            if 'result' not in state:
+                raise ValueError('Submit an answer before going to the next question')
+            if state['index'] + 1 == TOTAL:
+                history = self.history(state)
+                if len(history) != TOTAL:
+                    raise LookupError('Finish the quiz first')
+                self.scores.save(token, history, state['answered_at'])
+                return path + '/result'
+            next_token = state.get('next_token')
+            if next_token is None:
+                next_token = self.quiz.start(state['index'] + 1, self.history(state))['token']
+                self.quiz.save_round(token, {**state, 'next_token': next_token})
+            return f'/quiz/{next_token}'
 
     def history(self, state):
         history = state['history']
@@ -99,18 +108,27 @@ class QuizPages:
             if 'result' not in state and now >= state['deadline']:
                 self.quiz.answer(token, None)
                 state = self.quiz.get_round(token)
+            hint_left = self.quiz.hint_ttl(token) if not show_results else 0
         results = self.history(state)
-        if show_results and len(results) != TOTAL:
-            raise LookupError('Finish the quiz first')
         path = f'/quiz/{token}'
+        if show_results:
+            if len(results) != TOTAL:
+                raise LookupError('Finish the quiz first')
+            status, recent = self.scores.recent()
+            return self.render(
+                stage=self.results(results),
+                hint=self.recent_results(path, status, recent),
+                events=self.result_cache_event(status),
+                completed=len(results),
+            )
         left = max(0, state['deadline'] - state.get('answered_at', now))
         running = 'result' not in state
         refresh = f'<meta http-equiv="refresh" content="{ceil(left)}">' if running else ''
         return self.render(
-            stage=self.results(results) if show_results else self.round(path, state, left),
-            hint=self.hint_panel(path, state, now),
+            stage=self.round(path, state, left),
+            hint=self.hint_panel(path, state, hint_left),
             events=self.event_panel(token, state.get('hint_events', [])),
-            completed=len(results), index=state['index'], active=not show_results,
+            completed=len(results), index=state['index'], active=True,
             refresh=refresh,
         )
 
@@ -124,9 +142,9 @@ class QuizPages:
               <div class="art-tag art-tag-time">00:{HINT_SECONDS:02}</div>
             </div>
             <div class="intro-copy">
-              <h2>힌트를 꺼낼 시간은<br>딱 {HINT_SECONDS}초.</h2>
-              <p>문제는 총 {TOTAL}개예요. 각 문제에 {ROUND_SECONDS}초가 주어지고,
-                힌트는 문제가 시작된 뒤 {HINT_SECONDS}초 동안 조회할 수 있어요.</p>
+              <h2>힌트는 기본<br>{HINT_SECONDS}초 동안.</h2>
+              <p>문제는 총 {TOTAL}개이며 문제당 {ROUND_SECONDS}초가 주어져요.
+                힌트는 문제당 한 번 조회할 수 있고, 만료 전 한 번만 {HINT_EXTENSION_SECONDS}초 연장할 수 있어요.</p>
               {action_button('/quiz/start', '퀴즈 시작')}
             </div>
           </div>'''
@@ -177,28 +195,38 @@ class QuizPages:
             {feedback}
           </div>'''
 
-    def hint_panel(self, path, state, now):
-        deadline = state['deadline'] - ROUND_SECONDS + HINT_SECONDS
-        left = max(0, deadline - now)
+    def hint_panel(self, path, state, left):
+        extended = state.get('hint_extended', False)
+        duration = HINT_SECONDS + HINT_EXTENSION_SECONDS if extended else HINT_SECONDS
+        left = min(left, duration)
+        queries = state.get('hint_queries', 0)
+        hint_used = queries >= 1
+        expired_message = HINT_EXPIRED if hint_used else HINT_EXPIRED_UNUSED
         events = state.get('hint_events', [])
-        recent = events[0] if events else None
+        recent = next((event for event in events if event['command'] == 'GET'), None)
         if left == 0:
-            message = HINT_MISS if recent and recent['status'] == 'MISS' else HINT_RETRY
+            message = HINT_MISS if recent and recent['status'] == 'MISS' else expired_message
             message = f'<p role="status">{message}</p>'
         else:
             value = recent['value'] if recent and recent['status'] == 'HIT' else '힌트 조회를 누르면 Redis에서 값을 찾아요.'
             message = f'''
               <div class="hint-details" style="--delay:{left:.3f}s">
                 <p class="hide-at-end">{escape(value)}</p>
-                <p class="show-at-end">{HINT_RETRY}</p>
+                <p class="show-at-end">{expired_message}</p>
               </div>'''
         return f'''
           <div class="hint-heading"><h2>Redis 힌트</h2>
-            <span class="hint-time">{countdown(left, '만료')}</span>
+            <span class="hint-time">TTL {countdown(left, '만료')}</span>
           </div>
-          {meter(left, HINT_SECONDS, '힌트의 남은 시간')}
+          {meter(left, duration, '캐시에 남은 힌트 시간')}
           {message}
-          {action_button(path + '/hint', '힌트 조회', 'hint-button', '↗')}'''
+          <div class="hint-actions">
+            {action_button(path + '/hint', '힌트 조회 완료' if hint_used else '힌트 조회',
+                           'hint-button', '↗', disabled=hint_used)}
+            {action_button(path + '/extend', '연장 사용 완료' if extended else f'힌트 {HINT_EXTENSION_SECONDS}초 연장',
+                           'hint-button hint-extend', '+', disabled=extended or left == 0 or 'result' in state)}
+          </div>
+          <div class="hint-count">이번 문제 조회 <strong>{queries}회</strong> · 최대 1회</div>'''
 
     def event_panel(self, token, events):
         items = [
@@ -206,11 +234,37 @@ class QuizPages:
             f'TTL {HINT_SECONDS}초</span></li>'
         ]
         for event in reversed(events):
+            if event['command'] == 'EXPIRE':
+                items.append(f'<li><b>EXPIRE</b><span>힌트 시간을 {HINT_EXTENSION_SECONDS}초 연장했어요.</span></li>')
+                continue
             hit = event['status'] == 'HIT'
             tone = 'hit' if hit else 'miss'
             message = '유효한 힌트를 반환했어요.' if hit else 'Redis에 유효한 힌트가 없어요.'
-            items.append(f'<li><b class="{tone}">GET · {event["status"]}</b><span>{message}</span></li>')
+            items.append(f'<li><b class="{tone}">GET · {event["status"]}</b>'
+                         f'<span>{message} 조회 {event["queries"]}회</span></li>')
         return f'<code>quiz:hint:{token}</code><ol class="cache-log">{"".join(items)}</ol>'
+
+    def recent_results(self, path, status, recent):
+        tone = status.lower()
+        entries = []
+        for result in recent:
+            date = datetime.fromtimestamp(result['completed_at']).strftime('%m/%d %H:%M:%S')
+            entries.append(f'<li><time>{date}</time><strong>{result["score"]} / {result["total"]}</strong></li>')
+        listing = f'<ul class="recent-results">{"".join(entries)}</ul>' if entries else '<p>아직 저장된 기록이 없어요.</p>'
+        return f'''
+          <div class="hint-heading"><h2>최근 퀴즈 기록</h2><span class="cache-badge {tone}">{status}</span></div>
+          {listing}
+          <a class="hint-button" href="{path}/result">결과 목록 다시 조회 <span aria-hidden="true">↻</span></a>'''
+
+    def result_cache_event(self, status):
+        if status == 'HIT':
+            items = '<li><b class="hit">GET · HIT</b><span>Redis에 저장된 목록을 가져왔어요.</span></li>'
+        else:
+            items = (
+                '<li><b class="miss">GET · MISS</b><span>SQLite에서 최근 점수 목록을 읽었어요.</span></li>'
+                f'<li><b>SET</b><span>목록을 Redis에 {RECENT_TTL}초 동안 저장했어요.</span></li>'
+            )
+        return f'<code>{RECENT_KEY}</code><ol class="cache-log">{items}</ol>'
 
     def results(self, results):
         count = sum(result['correct'] for result in results)
