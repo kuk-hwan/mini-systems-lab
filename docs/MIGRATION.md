@@ -2,6 +2,12 @@
 
 통합일: 2026-11-20. 현재 저장소는 [kuk-hwan/mini-systems-lab](https://github.com/kuk-hwan/mini-systems-lab)입니다. 통합·보존 검증 후 사용자가 기존 세 저장소를 직접 삭제했습니다. 삭제 후 통합 저장소를 새로 clone하여 원본 브랜치·커밋·파일이 그대로 남아 있는지 다시 확인했습니다.
 
+## 이후 변경 · 웹 서버 전용 저장소 분리
+
+2026-11-20에 웹 서버를 [kuk-hwan/mini-webserver](https://github.com/kuk-hwan/mini-webserver)로 옮겼습니다. 전용 저장소를 새로 clone해 39개 원본 파일의 보존과 Git 객체 무결성을 확인한 후 통합 main의 해당 폴더·C 검사 workflow를 제거했습니다. 웹 서버 관련 커밋 4개를 추출했고, 새 경로 때문에 달라진 커밋 번호는 [전용 분리 기록](https://github.com/kuk-hwan/mini-webserver/blob/main/docs/MIGRATION.md)에서 확인합니다.
+
+원본 보존 브랜치와 아래 79개 원본 커밋의 검증 명세는 그대로 유지합니다. 아래 파일 배치는 최초 통합 시점 기록이며, 현재 실행 구조는 [루트 README](../README.md)를 기준으로 확인합니다.
+
 ## 무엇을 가져왔나요?
 
 | 원본 | 브랜치 | 해당 저장소에서 도달 가능한 커밋 |

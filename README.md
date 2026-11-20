@@ -1,6 +1,6 @@
 # Mini Systems Lab
 
-**직접 만든 Mini React · Mini Redis · Mini DBMS · POSIX C 웹 서버를 한 저장소에서 실행하고 공부하는 시스템 구현 모음입니다.**
+**직접 만든 Mini React · Mini Redis · Mini DBMS를 한 저장소에서 실행하고 공부하는 시스템 구현 모음입니다.**
 
 세 원본 저장소의 **브랜치 10개와 고유 커밋 79개**를 커밋 번호 변경 없이 보존했습니다. 기존 세 저장소는 삭제되었으며, 앞으로는 **이 저장소의 `main`**에서 실행·개발합니다. 이전 버전·팀원의 다른 구현은 `react/*`, `redis/*`, `dbms/*` 보존 브랜치에서 확인할 수 있습니다. 삭제 후 새로 clone해 브랜치·커밋·파일 보존과 Git 객체 무결성을 다시 확인했습니다.
 
@@ -15,7 +15,6 @@
 | `mini-react-fiber-lab/` | Virtual DOM, Diff·Patch, Fiber, State, Hooks, Batching | 4×4 카드 짝 맞추기와 렌더링 검사기 | [React README](mini-react-fiber-lab/README.md) |
 | `mini-redis/` | 해시 테이블, TTL, 원자적 카운터, 캐시 무효화, 스냅샷 | 시간 제한 퀴즈·힌트·결과 목록 HIT/MISS | [Redis README](mini-redis/README.md) |
 | `mini-dbms/` | SQL 파서, JSONL 저장, 메모리 B+ 트리, 스레드 풀 | CLI SQL 처리와 SQL API | [DBMS README](mini-dbms/README.md) |
-| `mini-webserver/` | POSIX 소켓, HTTP 파서, 정적 파일, 스레드 풀, Reverse Proxy | 실제 요청 데모와 A/B 백엔드 중계 | [C 웹 서버 README](mini-webserver/README.md) |
 
 프로젝트들은 각각 독립적으로 실행합니다. Redis 퀴즈의 SQLite 점수 저장소는 퀴즈의 데이터 보관용이며, 직접 만든 Mini DBMS와는 별개입니다.
 
@@ -26,10 +25,9 @@ mini-systems-lab/
 ├── mini-react-fiber-lab/    TypeScript · 카드 게임 · 렌더링 검사기
 ├── mini-redis/              Python · 캐시 엔진 · 퀴즈
 ├── mini-dbms/               Python · SQL · B+ 트리 · API
-├── mini-webserver/          C · HTTP 서버 · Reverse Proxy
 ├── docs/                   통합 경위 · 원본 이력 · 검증 기록
 ├── scripts/                이력 검증 · 전체 검사 명령
-├── .github/workflows/      네 프로젝트와 이력의 자동 검사
+├── .github/workflows/      세 프로젝트와 이력의 자동 검사
 └── README.md               전체 안내 · 실행 시작점
 ```
 
@@ -42,9 +40,8 @@ mini-systems-lab/
 | Mini React | Node.js 24 권장 · npm | [카드 게임 · 5173](http://127.0.0.1:5173) |
 | Mini Redis | Python 3.11 이상 · 표준 라이브러리 | [시간 제한 퀴즈 · 8787](http://127.0.0.1:8787) |
 | Mini DBMS | Python 3.11 이상 · 표준 라이브러리 | CLI 출력 또는 `POST http://127.0.0.1:8796/api/sql` |
-| C 웹 서버 | Linux/macOS/WSL2 · C 컴파일러 · make · Python 3 · curl | [웹 서버 데모 · 8080](http://localhost:8080) |
 
-React만 `npm ci`로 개발 도구를 설치합니다. 두 Python 프로젝트에는 별도의 `pip install`이 필요하지 않습니다. C 서버는 Windows에서는 **WSL2 Ubuntu 터미널**에서 빌드·실행합니다.
+React만 `npm ci`로 개발 도구를 설치합니다. 두 Python 프로젝트에는 별도의 `pip install`이 필요하지 않습니다.
 
 ### 저장소 받기
 
@@ -53,7 +50,7 @@ git clone https://github.com/kuk-hwan/mini-systems-lab.git
 cd mini-systems-lab
 ```
 
-아래 네 프로젝트의 명령은 **각각 새 터미널에서 `mini-systems-lab` 루트 폴더를 시작 위치로** 사용합니다. 서버를 실행한 터미널은 그대로 두고, 종료하려면 `Ctrl+C`를 누릅니다. 모든 프로젝트를 동시에 켤 필요는 없습니다.
+아래 세 프로젝트의 명령은 **각각 새 터미널에서 `mini-systems-lab` 루트 폴더를 시작 위치로** 사용합니다. 서버를 실행한 터미널은 그대로 두고, 종료하려면 `Ctrl+C`를 누릅니다. 모든 프로젝트를 동시에 켤 필요는 없습니다.
 
 ### 1. Mini React · 카드 짝 맞추기
 
@@ -105,26 +102,14 @@ Invoke-RestMethod -Uri http://127.0.0.1:8796/api/sql -Method Post -ContentType '
 
 ![Mini DBMS의 API·SQL 처리·인덱스·파일 저장 계층](mini-dbms/docs/architecture.png)
 
-### 4. C 웹 서버 · Reverse Proxy
+## 별도 저장소 · C 웹 서버
 
-Linux·macOS 또는 WSL2 Ubuntu에서 저장소 루트를 기준으로 실행합니다.
+C11/POSIX 웹 서버는 전용 저장소 **[kuk-hwan/mini-webserver](https://github.com/kuk-hwan/mini-webserver)**로 옮겼습니다. 소스·테스트·정적 데모·측정 기록과 관련 변경 이력을 가져갔으며, 웹 서버 개발과 자동 검사는 그 저장소에서 진행합니다.
 
-Ubuntu/WSL2에서 최초 한 번 빌드 도구를 준비합니다. macOS는 Xcode Command Line Tools와 Python 3를 준비합니다.
+- [웹 서버 실행 방법과 Reverse Proxy](https://github.com/kuk-hwan/mini-webserver#readme)
+- [분리한 파일과 커밋 대응표](https://github.com/kuk-hwan/mini-webserver/blob/main/docs/MIGRATION.md)
 
-```sh
-sudo apt-get update
-sudo apt-get install -y build-essential python3 curl
-```
-
-Windows에서 받은 저장소를 WSL2에서 사용할 때는 해당 폴더의 `/mnt/c/.../mini-systems-lab` 경로로 먼저 이동합니다. 이후 다음 명령을 실행합니다.
-
-```sh
-cd mini-webserver
-make
-./build/mini-webserver --port 8080 --root public
-```
-
-[http://localhost:8080](http://localhost:8080)에서 정적 페이지·상태 조회·POST·오류 응답을 확인합니다. 백엔드 두 개를 연결하는 [Reverse Proxy 실행 방법](mini-webserver/README.md#reverse-proxy와-ab-백엔드-실행)도 제공합니다.
+통합 저장소 `main`에서는 `mini-webserver/` 폴더를 제거했습니다. 이동 전 파일은 [이동 전 커밋](https://github.com/kuk-hwan/mini-systems-lab/tree/6253cbc1ec8649075e95c62a91324cef6ebfb82b/mini-webserver)과 기존 보존 브랜치에 그대로 남습니다.
 
 ## 한 곳에서 검사하기
 
@@ -140,7 +125,7 @@ cd ..
 python scripts/check_all.py --e2e
 ```
 
-Windows의 C 검사는 설치된 WSL2 Ubuntu와 `make`·C 컴파일러를 사용합니다. Linux/macOS는 POSIX 도구를 직접 사용합니다. `--skip-c`는 해당 도구가 없는 환경에서 나머지만 검사할 때 사용하며, C 검사 통과를 의미하지 않습니다.
+전체 검사 명령은 이 저장소의 React·Redis·DBMS와 원본 이력을 검사합니다. 웹 서버는 전용 저장소에서 `make test smoke`로 검사하며, 더 이상 이 명령에 WSL이나 C 빌드 도구가 필요하지 않습니다.
 
 개별 검사 명령은 다음과 같습니다. **실행 위치** 폴더로 이동한 뒤 명령을 입력합니다.
 
@@ -150,7 +135,6 @@ Windows의 C 검사는 설치된 WSL2 Ubuntu와 `make`·C 컴파일러를 사용
 | React 실제 브라우저 | `mini-react-fiber-lab/` | `npm run test:e2e` · Chromium 설치 필요 |
 | Redis 엔진·퀴즈 API | `mini-redis/` | `python -m unittest discover -s . -v` |
 | DBMS SQL·인덱스·API | `mini-dbms/` | `python -m unittest discover -s tests -v` |
-| C 단위·통합·curl 검사 | `mini-webserver/` · POSIX 환경 | `make test smoke` |
 
 통합 시 검증 결과는 [실행 검증 문서](docs/VERIFICATION.md), 최신 커밋의 자동 검사 결과는 [GitHub Actions](https://github.com/kuk-hwan/mini-systems-lab/actions)에서 확인합니다.
 
@@ -174,6 +158,6 @@ python scripts/verify_history.py --remote origin --fsck
 
 ## 출처와 범위
 
-현재 실행 코드는 [Mini React](mini-react-fiber-lab/), [Mini Redis](mini-redis/), [Mini DBMS](mini-dbms/), [C 웹 서버](mini-webserver/) 폴더에 있습니다. 삭제된 원본 저장소의 코드는 위 보존 브랜치에서 계속 확인할 수 있습니다. 원래 작성자·커미터·메시지·커밋 내용은 그대로 보존합니다. 각 구현의 출처·기존 라이선스는 원래 브랜치와 해당 파일을 기준으로 확인합니다. 통합 작업으로 전체 원본을 새 라이선스로 변경하지 않았습니다.
+현재 실행 코드는 [Mini React](mini-react-fiber-lab/), [Mini Redis](mini-redis/), [Mini DBMS](mini-dbms/) 폴더에 있습니다. [C 웹 서버](https://github.com/kuk-hwan/mini-webserver)는 전용 저장소에서 관리합니다. 삭제된 원본 저장소의 코드는 위 보존 브랜치에서 계속 확인할 수 있습니다. 원래 작성자·커미터·메시지·커밋 내용은 그대로 보존합니다. 각 구현의 출처·기존 라이선스는 원래 브랜치와 해당 파일을 기준으로 확인합니다. 통합 작업으로 전체 원본을 새 라이선스로 변경하지 않았습니다.
 
-이번 작업은 Git 코드·브랜치·이력 통합입니다. 원본 GitHub의 이슈·PR·스타·Actions 실행 기록을 새 저장소로 이동한 것은 아닙니다. 기본 테스트 대상은 통합 `main`의 네 프로젝트이며, 보존된 다른 팀 브랜치들의 모든 구현을 다시 검증했다는 뜻은 아닙니다.
+이번 작업은 Git 코드·브랜치·이력 통합입니다. 원본 GitHub의 이슈·PR·스타·Actions 실행 기록을 새 저장소로 이동한 것은 아닙니다. 기본 테스트 대상은 통합 `main`의 세 프로젝트이며, 보존된 다른 팀 브랜치들의 모든 구현을 다시 검증했다는 뜻은 아닙니다.

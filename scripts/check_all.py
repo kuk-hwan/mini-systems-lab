@@ -17,7 +17,6 @@ def check(command, directory=ROOT):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--e2e', action='store_true', help='Also run installed Playwright Chromium')
-    parser.add_argument('--skip-c', action='store_true', help='Only when POSIX build tools are unavailable')
     args = parser.parse_args()
     npm = shutil.which('npm.cmd' if os.name == 'nt' else 'npm')
     if not npm:
@@ -28,15 +27,4 @@ if __name__ == '__main__':
         check([npm, 'run', 'test:e2e'], ROOT / 'mini-react-fiber-lab')
     check([sys.executable, '-m', 'unittest', 'discover', '-s', '.'], ROOT / 'mini-redis')
     check([sys.executable, '-m', 'unittest', 'discover', '-s', 'tests'], ROOT / 'mini-dbms')
-    if not args.skip_c:
-        if os.name == 'nt':
-            wsl = shutil.which('wsl')
-            if not wsl:
-                raise SystemExit('C checks require Linux/macOS or WSL2 Ubuntu.')
-            path = subprocess.check_output([wsl, '-d', 'Ubuntu', '--exec', 'wslpath', '-a',
-                                            (ROOT / 'mini-webserver').as_posix()],
-                                           encoding='utf-8').strip()
-            check([wsl, '-d', 'Ubuntu', '--exec', 'make', '-C', path, 'test', 'smoke'])
-        else:
-            check(['make', 'test', 'smoke'], ROOT / 'mini-webserver')
     print('\nPASS: requested project checks completed.', flush=True)

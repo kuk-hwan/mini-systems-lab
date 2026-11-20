@@ -1,5 +1,7 @@
 # 통합 main 실행 검증
 
+> 아래 네 프로젝트의 표는 최초 통합 시점의 검증 기록입니다. 이후 C 웹 서버는 [전용 저장소](https://github.com/kuk-hwan/mini-webserver)로 분리했습니다. 현재 이 저장소의 전체 검사·CI는 React·Redis·DBMS·이력 검증을 수행합니다. 웹 서버의 새 검사 결과는 [전용 Actions](https://github.com/kuk-hwan/mini-webserver/actions)에서 확인합니다.
+
 검증일: 2026-11-20. 원본 보존 브랜치의 엔진 코드를 바꾸지 않고 통합 main의 새 경로에서 검사했습니다.
 
 ## 이력 무결성
