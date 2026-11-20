@@ -1,0 +1,11 @@
+**/node_modules/
+**/__pycache__/
+**/.data/
+**/dist/
+**/build/
+**/build-sanitize/
+**/playwright-report/
+**/test-results/
+*.log
+.env
+.env.*

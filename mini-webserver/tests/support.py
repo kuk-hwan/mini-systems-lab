@@ -1,5 +1,6 @@
 """Standard-library-only test tooling; the server under test is C/POSIX."""
 import contextlib
+import errno
 import http.client
 from pathlib import Path
 import signal
@@ -81,7 +82,13 @@ def raw(port, data, shutdown=True):
     with socket.create_connection(("127.0.0.1", port), timeout=5) as sock:
         sock.sendall(data)
         if shutdown:
-            sock.shutdown(socket.SHUT_WR)
+            try:
+                sock.shutdown(socket.SHUT_WR)
+            except OSError as error:
+                # An overload response may already have closed the peer before
+                # this half-close. Still read and assert the actual HTTP status.
+                if error.errno not in (errno.ENOTCONN, errno.ECONNRESET, errno.EPIPE):
+                    raise
         chunks = []
         while True:
             try:

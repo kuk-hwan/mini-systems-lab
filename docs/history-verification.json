@@ -1,0 +1,28 @@
+{
+  "source_repositories": 3,
+  "source_refs_preserved": 10,
+  "unique_source_commits_preserved": 79,
+  "all_original_commits_reachable_from_main": true,
+  "remote_verified": false,
+  "git_fsck_passed": true,
+  "projects": [
+    {
+      "repository": "kuk-hwan/mini-react-fiber-lab",
+      "commits": 17,
+      "refs": 1,
+      "all_original_shas_preserved": true
+    },
+    {
+      "repository": "kuk-hwan/mini-redis",
+      "commits": 46,
+      "refs": 4,
+      "all_original_shas_preserved": true
+    },
+    {
+      "repository": "kuk-hwan/mini-DBMS",
+      "commits": 16,
+      "refs": 5,
+      "all_original_shas_preserved": true
+    }
+  ]
+}

@@ -13,8 +13,8 @@
 개발과 CI 검증에는 Node.js 24를 사용합니다. Node.js 22를 사용한다면 22.12 이상이 필요합니다.
 
 ```bash
-git clone https://github.com/kuk-hwan/mini-react-fiber-lab.git
-cd mini-react-fiber-lab
+git clone https://github.com/kuk-hwan/mini-systems-lab.git
+cd mini-systems-lab/mini-react-fiber-lab
 npm ci
 npm run dev
 ```
