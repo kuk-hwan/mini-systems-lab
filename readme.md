@@ -1,4 +1,25 @@
-# Mini DBMS
+# Mini DBMS · C Web Server
+
+이 브랜치는 기존 Mini DBMS와, POSIX 소켓으로 직접 구현한 **C 웹 서버 + Reverse Proxy**를 함께 보관합니다. 두 프로젝트는 독립적으로 실행합니다.
+
+| 프로젝트 | 내용 | 실행·구조·검증 |
+|---|---|---|
+| `mini-webserver/` | C11, GET·POST, 정적 파일, 스레드 풀, Reverse Proxy, Round-Robin | [웹 서버 README](mini-webserver/README.md) |
+| `mini-dbms/` | Python SQL 처리기, B+ 트리, 파일 저장, Thread Pool API | [DBMS README](mini-dbms/README.md) |
+
+## C 웹 서버 시작
+
+Linux·macOS·WSL2 Ubuntu에서 실행합니다.
+
+```sh
+cd mini-webserver
+make
+./build/mini-webserver --port 8080 --root public
+```
+
+[http://localhost:8080](http://localhost:8080)에서 요청 데모를 확인합니다. [백엔드 A/B를 실행하는 Reverse Proxy 예시](mini-webserver/README.md#reverse-proxy와-ab-백엔드-실행), [함수 실행 흐름](mini-webserver/docs/architecture.md), [검증 기록](mini-webserver/docs/verification.md)도 제공합니다.
+
+## 기존 Mini DBMS
 
 SQL을 직접 해석하고 테이블 파일에 행을 저장하는 Python 기반 데이터베이스입니다.
 

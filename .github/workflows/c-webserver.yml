@@ -1,0 +1,32 @@
+name: C web server
+on:
+  push:
+    branches: ['feat/kuk-hwan/c-web-server']
+    paths: ['mini-webserver/**', '.github/workflows/c-webserver.yml']
+  pull_request:
+    paths: ['mini-webserver/**', '.github/workflows/c-webserver.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  portable-build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: mini-webserver
+    steps:
+      - uses: actions/checkout@v4
+      - run: make test smoke
+  memory:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mini-webserver
+    steps:
+      - uses: actions/checkout@v4
+      - run: make sanitize-test
+      - run: sudo apt-get update -qq && sudo apt-get install -y valgrind
+      - run: make valgrind

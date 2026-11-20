@@ -1,0 +1,99 @@
+PROXY
+==432== Memcheck, a memory error detector
+==432== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==432== Using Valgrind-3.26.0 and LibVEX; rerun with -h for copyright info
+==432== Command: /mnt/c/Users/______/Documents/Codex/2026-11-07/phase-1-virtual-dom-diff-patch/work/mini-dbms-team-copy/mini-webserver/build/mini-webserver --port 42985 --root /tmp/mini-web-valgrind-d90j8iaw --workers 2 --timeout-ms 1000 --route /api/=127.0.0.1:58141
+==432== 
+READY http://127.0.0.1:42985 workers=2 routes=1 root=/tmp/mini-web-valgrind-d90j8iaw
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+request method=GET target=/ handler=local keep=1
+request method=GET target=/missing handler=local keep=1
+request method=POST target=/api/echo handler=proxy keep=1
+request method=GET target=/api/whoami handler=proxy keep=1
+STOPPED workers joined; queued connections and resources released
+==432== 
+==432== FILE DESCRIPTORS: 3 open (3 inherited) at exit.
+==432== 
+==432== HEAP SUMMARY:
+==432==     in use at exit: 0 bytes in 0 blocks
+==432==   total heap usage: 46 allocs, 46 frees, 163,744 bytes allocated
+==432== 
+==432== All heap blocks were freed -- no leaks are possible
+==432== 
+==432== For lists of detected and suppressed errors, rerun with: -s
+==432== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+
+BACKEND
+==429== Memcheck, a memory error detector
+==429== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==429== Using Valgrind-3.26.0 and LibVEX; rerun with -h for copyright info
+==429== Command: /mnt/c/Users/______/Documents/Codex/2026-11-07/phase-1-virtual-dom-diff-patch/work/mini-dbms-team-copy/mini-webserver/build/mini-webserver --port 58141 --root /tmp/mini-web-valgrind-d90j8iaw --workers 2
+==429== 
+READY http://127.0.0.1:58141 workers=2 routes=0 root=/tmp/mini-web-valgrind-d90j8iaw
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+request method=POST target=/api/echo handler=local keep=0
+request method=GET target=/api/whoami handler=local keep=0
+STOPPED workers joined; queued connections and resources released
+==429== 
+==429== FILE DESCRIPTORS: 3 open (3 inherited) at exit.
+==429== 
+==429== HEAP SUMMARY:
+==429==     in use at exit: 0 bytes in 0 blocks
+==429==   total heap usage: 24 allocs, 24 frees, 163,208 bytes allocated
+==429== 
+==429== All heap blocks were freed -- no leaks are possible
+==429== 
+==429== For lists of detected and suppressed errors, rerun with: -s
+==429== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

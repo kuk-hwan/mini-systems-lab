@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Socket Lab · C Web Server</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/"><span>↔</span> socketlab</a><span class="tag">C11 / POSIX / HTTP 1.1</span></header>
+  <main>
+    <div class="eyebrow">BUILD THE CONNECTION. UNDERSTAND THE FLOW.</div>
+    <h1>요청 하나의 여정을<br><em>직접 만든 서버에서.</em></h1>
+    <p class="intro">소켓 연결부터 HTTP 해석, 정적 파일 응답과 Reverse Proxy까지.<br>아래 버튼은 실제 C 서버로 요청을 보냅니다.</p>
+    <section class="flow" aria-label="서버의 처리 구조"><span>01 연결 수락</span><b>→</b><span>02 스레드 풀</span><b>→</b><span>03 HTTP 파싱</span><b>→</b><span>04 라우팅</span><b>→</b><span>05 응답</span></section>
+    <div class="grid">
+      <section class="panel">
+        <div class="section-label">01 / REQUEST PLAYGROUND</div>
+        <h2>서버에 말을 걸어보세요.</h2>
+        <div class="actions">
+          <button data-path="/health"><span class="method">GET</span><strong>서버 상태 확인</strong><small>/health · 로컬 동적 응답</small></button>
+          <button data-path="/api/whoami"><span class="method purple">GET</span><strong>어느 백엔드일까요?</strong><small>/api/whoami · 두 번 눌러 A/B 비교</small></button>
+          <button data-path="/missing-file"><span class="method amber">GET</span><strong>없는 파일 요청</strong><small>/missing-file · 404 오류 응답</small></button>
+        </div>
+        <form id="echo-form"><label for="message">POST 본문을 그대로 돌려받기</label><div class="input-row"><input id="message" value="Hello, POSIX!" maxlength="1024" required><button type="submit">전송 ↗</button></div><p>입력은 UTF-8 바이트로 전송합니다. <code>/api/echo</code></p></form>
+        <p class="note">프록시 설정 없이 실행하면 <code>/api/*</code>는 이 서버가 직접 처리해요. README의 3대 서버 실행 예시로 시작하면 A/B 백엔드에 전달돼요.</p>
+      </section>
+      <section class="panel response-panel" aria-live="polite">
+        <div class="section-label">02 / LIVE RESPONSE</div>
+        <div class="response-title"><h2>실제 응답</h2><span id="status">요청 대기</span></div>
+        <div id="request-label" class="request-label">버튼을 눌러 요청을 시작하세요.</div>
+        <dl><div><dt>응답 시간</dt><dd id="elapsed">—</dd></div><div><dt>Content-Type</dt><dd id="type">—</dd></div><div><dt>Content-Length</dt><dd id="length">—</dd></div></dl>
+        <pre id="body">// 응답 본문이 여기에 표시됩니다.</pre>
+      </section>
+    </div>
+    <section class="panel history"><div class="section-label">03 / REQUEST HISTORY</div><h2>요청 기록</h2><div class="table-wrap"><table><thead><tr><th>순서</th><th>요청</th><th>상태</th><th>응답 시간</th><th>백엔드</th></tr></thead><tbody id="history"><tr id="empty"><td colspan="5">아직 전송한 요청이 없어요.</td></tr></tbody></table></div></section>
+    <footer>HTTP 라이브러리 없이 구현한 C 웹 서버 · 스레드 풀 · 정적 파일 · Reverse Proxy<br>이 화면은 정적 파일이며, 위 결과는 실제 API 응답입니다.</footer>
+  </main>
+</body>
+</html>
