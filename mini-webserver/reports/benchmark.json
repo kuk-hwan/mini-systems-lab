@@ -1,0 +1,120 @@
+{
+  "measured_at_utc": "2026-11-20T06:02:00.650762+00:00",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.43",
+  "cpu_count": 12,
+  "compiler": "cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0",
+  "workers": 64,
+  "queue": 512,
+  "requests_per_case": 1000,
+  "notes": "Loopback WSL2 measurement; backend connection is deliberately not pooled. Not a C10K proof.",
+  "results": [
+    {
+      "path": "static",
+      "concurrency": 1,
+      "keep_alive": false,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 453.17
+    },
+    {
+      "path": "static",
+      "concurrency": 1,
+      "keep_alive": true,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 468.9
+    },
+    {
+      "path": "static",
+      "concurrency": 10,
+      "keep_alive": false,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 2676.27
+    },
+    {
+      "path": "static",
+      "concurrency": 10,
+      "keep_alive": true,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 2853.24
+    },
+    {
+      "path": "static",
+      "concurrency": 50,
+      "keep_alive": false,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 2517.22
+    },
+    {
+      "path": "static",
+      "concurrency": 50,
+      "keep_alive": true,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 2770.09
+    },
+    {
+      "path": "reverse-proxy",
+      "concurrency": 1,
+      "keep_alive": false,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 1977.0
+    },
+    {
+      "path": "reverse-proxy",
+      "concurrency": 1,
+      "keep_alive": true,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 3263.05
+    },
+    {
+      "path": "reverse-proxy",
+      "concurrency": 10,
+      "keep_alive": false,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 7000.35
+    },
+    {
+      "path": "reverse-proxy",
+      "concurrency": 10,
+      "keep_alive": true,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 16115.78
+    },
+    {
+      "path": "reverse-proxy",
+      "concurrency": 50,
+      "keep_alive": false,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 7158.76
+    },
+    {
+      "path": "reverse-proxy",
+      "concurrency": 50,
+      "keep_alive": true,
+      "completed": 1000,
+      "failed": 0,
+      "non_2xx": 0,
+      "requests_per_second": 17558.34
+    }
+  ]
+}
