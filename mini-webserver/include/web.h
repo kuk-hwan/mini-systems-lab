@@ -2,6 +2,10 @@
 #define MINI_WEB_H
 
 #define _POSIX_C_SOURCE 200809L
+#if defined(__APPLE__) && !defined(_DARWIN_C_SOURCE)
+/* macOS hides mkdtemp/O_NOFOLLOW under strict feature selection. */
+#define _DARWIN_C_SOURCE 1
+#endif
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
