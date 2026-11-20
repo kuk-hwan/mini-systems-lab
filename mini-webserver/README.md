@@ -1,5 +1,7 @@
 # Socket Lab · C Web Server
 
+[Mini Systems Lab 전체 안내](../README.md) · 아래 빠른 시작은 `mini-systems-lab/` 루트에서 시작합니다. 빌드·테스트는 `mini-webserver/`에서 실행합니다.
+
 C11과 POSIX API로 직접 구현한 **HTTP/1.0·HTTP/1.1 웹 서버 + Reverse Proxy**입니다. 웹 서버 실행에는 외부 HTTP 라이브러리나 프레임워크가 필요하지 않습니다. 같은 저장소의 `mini-dbms`와 독립적으로 실행하며, DBMS를 실행하지 않아도 빌드·테스트·데모를 사용할 수 있습니다.
 
 ## 바로 실행하기

@@ -1,5 +1,7 @@
 # Mini DBMS
 
+[Mini Systems Lab 전체 안내](../README.md) · 아래 명령은 저장소 루트에서 `cd mini-dbms`로 이동한 뒤 실행합니다.
+
 SQL을 직접 파싱하고 실행하는 Python 파일 기반 데이터베이스입니다. Python 3.11 이상과 표준 라이브러리로 실행할 수 있습니다.
 
 ## 계층 구조

@@ -1,5 +1,7 @@
 # Fiber Lab · Mini React
 
+[Mini Systems Lab 전체 안내](../README.md) · 현재 실행 위치: `mini-systems-lab/mini-react-fiber-lab/`
+
 **카드 짝 맞추기를 하면서 Mini React가 상태를 실제 DOM에 반영하는 과정을 확인할 수 있는 Vanilla TypeScript 프로젝트입니다.**
 
 4×4 카드에서 한 장씩 두 장을 고르면 시도 횟수가 올라갑니다. 오른쪽 위 **렌더링 검사기**에서 그 클릭의 커밋을 열어 보세요. **Phase 2**는 상태 변경 요청 수와 상태·Props의 전후 값을, **Phase 1**은 같은 커밋에서 실제 DOM에 적용한 Patch를 보여줍니다.

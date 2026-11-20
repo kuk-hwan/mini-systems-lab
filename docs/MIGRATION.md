@@ -1,6 +1,6 @@
 # 이력 보존 방식과 브랜치 대응표
 
-통합일: 2026-11-20. 새 저장소는 `kuk-hwan/mini-systems-lab`입니다. 세 원본 저장소에는 변경·삭제·Archive 작업을 하지 않았습니다.
+통합일: 2026-11-20. 현재 저장소는 [kuk-hwan/mini-systems-lab](https://github.com/kuk-hwan/mini-systems-lab)입니다. 통합·보존 검증 후 사용자가 기존 세 저장소를 직접 삭제했습니다. 삭제 후 통합 저장소를 새로 clone하여 원본 브랜치·커밋·파일이 그대로 남아 있는지 다시 확인했습니다.
 
 ## 무엇을 가져왔나요?
 
@@ -64,10 +64,14 @@ python scripts/verify_history.py --fsck
 python scripts/verify_history.py --remote origin --fsck
 ```
 
-검사기는 브랜치별 원본 SHA 일치, 원본 커밋 79개가 main에서 도달 가능한지, Git 객체 무결성, 선택 시 원격 저장소의 실제 참조까지 확인합니다. 원본 세 저장소의 참조를 다시 조회해서 가져온 시점과 변경되지 않은 것도 업로드 후 확인합니다.
+검사기는 통합 시 기록한 명세를 기준으로 브랜치별 원본 SHA 일치, 원본 커밋 79개가 main에서 도달 가능한지, Git 객체 무결성, 선택 시 통합 원격 저장소의 실제 참조까지 확인합니다. 삭제한 원본 저장소에 접속하지 않아도 검증할 수 있습니다.
+
+삭제 후 새로 받은 사본은 삭제 전 mirror 백업과도 대조했습니다. 원본 브랜치 10개의 HEAD와 파일 트리가 모두 같고, 원본 커밋 79개·파일 내용 객체 465개·트리 객체 263개가 모두 존재했습니다. `git fsck --full --strict`를 통과했으며, 삭제한 저장소나 다른 로컬 저장소의 객체에 의존하지 않습니다.
 
 ## 기존 저장소와 GitHub 정보
 
-원본 저장소는 계속 사용할 수 있습니다. 통합 저장소와 자동으로 동기화되지는 않으므로 향후 변경을 어느 저장소에서 개발할지 정해야 합니다. 이후에는 통합 main에서 작업하고 원본 보존 브랜치를 수정하지 않는 방식을 권장합니다.
+기존 세 저장소는 삭제되었습니다. 실행할 최신 코드는 [통합 main](https://github.com/kuk-hwan/mini-systems-lab/tree/main)에, 원래 버전은 [React 보존 브랜치](https://github.com/kuk-hwan/mini-systems-lab/tree/react/main), [Redis 보존 브랜치](https://github.com/kuk-hwan/mini-systems-lab/tree/redis/feat/kuk-hwan/mini-redis), [DBMS·웹 서버 보존 브랜치](https://github.com/kuk-hwan/mini-systems-lab/tree/dbms/feat/kuk-hwan/c-web-server)에 있습니다. 이후에는 통합 main에서 새 작업 브랜치를 만들고 원본 보존 브랜치를 수정하지 않습니다.
+
+[import-manifest.json](import-manifest.json)에 남은 예전 저장소 이름·주소는 가져온 출처를 기록한 검증 자료입니다. 이 명세와 보존 브랜치의 과거 README는 원본 이력을 유지하기 위해 변경하지 않습니다. 현재 실행 방법은 [루트 README](../README.md)를 기준으로 확인합니다.
 
 이슈·PR·댓글·스타·기존 Actions 실행 결과·협업자 권한은 Git 커밋의 일부가 아니므로 이번 이력 통합에 포함하지 않았습니다. GitHub에 새 권한이나 협업자 설정을 복사하지 않았습니다.
