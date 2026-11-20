@@ -1,0 +1,64 @@
+{
+  "rows": 1000000,
+  "python": "3.14.2",
+  "platform": "Windows",
+  "insert_ms": 27921.136,
+  "insert_batch_size": 10000,
+  "repeats": 5,
+  "file_bytes": 52666688,
+  "index": {
+    "entries": 1000000,
+    "height": 4,
+    "nodes_per_level": [
+      1,
+      28,
+      947,
+      31250
+    ],
+    "order": 64
+  },
+  "queries": {
+    "indexed_id": {
+      "sql": "SELECT * FROM products WHERE id = 1000000",
+      "plan": "B+TREE",
+      "rows_examined": 1,
+      "index_nodes_visited": 4,
+      "median_ms": 0.466,
+      "samples_ms": [
+        0.466,
+        0.4145,
+        0.6154,
+        0.4397,
+        0.5622
+      ]
+    },
+    "scan_name": {
+      "sql": "SELECT * FROM products WHERE name = 'product-1000000'",
+      "plan": "FULL_SCAN",
+      "rows_examined": 1000000,
+      "index_nodes_visited": 0,
+      "median_ms": 2307.0072,
+      "samples_ms": [
+        2384.2499,
+        2341.506,
+        2280.7428,
+        2307.0072,
+        2252.8102
+      ]
+    },
+    "scan_id": {
+      "sql": "SELECT * FROM products WHERE id = 1000000",
+      "plan": "FULL_SCAN",
+      "rows_examined": 1000000,
+      "index_nodes_visited": 0,
+      "median_ms": 2245.4179,
+      "samples_ms": [
+        2306.1451,
+        2395.1416,
+        2245.4179,
+        2200.4759,
+        2200.7232
+      ]
+    }
+  }
+}
